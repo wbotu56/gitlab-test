@@ -1,0 +1,36 @@
+services:
+  gitlab:
+    image: gitlab/gitlab-ce@sha256:c3724668f3d8b5cb51846d8efe7f864a597804cd38050e377ab384d16c29695f
+    container_name: gitlab
+    restart: always
+    hostname: ${GITLAB_HOSTNAME}
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        # Add any other gitlab.rb configuration here, each on its own line
+        external_url "${GITLAB_EXTERNAL_URL}"
+        gitlab_rails['initial_root_password'] = "${GITLAB_ROOT_PASSWORD}"
+        gitlab_rails['smtp_enable'] = true
+        gitlab_rails['smtp_address'] = "${SMTP_HOST}"
+        gitlab_rails['smtp_port'] = ${SMTP_PORT}
+        gitlab_rails['smtp_user_name'] = "${SMTP_USERNAME}"
+        gitlab_rails['smtp_password'] = "${SMTP_PASSWORD}"
+        gitlab_rails['smtp_domain'] = "${SMTP_HOST}"
+        gitlab_rails['smtp_authentication'] = "login"
+        # gitlab_rails['smtp_tls'] = true
+        gitlab_rails['smtp_enable_starttls_auto'] = true
+        gitlab_rails['smtp_openssl_verify_mode'] = 'peer'
+        gitlab_rails['gitlab_email_enabled'] = true
+        gitlab_rails['gitlab_email_reply_to'] = "${SMTP_USERNAME}"
+        gitlab_rails['gitlab_email_from'] = "${SMTP_USERNAME}"
+        gitlab_rails['gitlab_email_display_name'] = "${SMTP_FROM_NAME}"
+    ports:
+      - '127.0.0.1:80:80'
+      - '127.0.0.1:443:443'
+      - '127.0.0.1:2222:22'
+    volumes:
+      - '${GITLAB_HOME}/config:/etc/gitlab'
+      - '${GITLAB_HOME}/logs:/var/log/gitlab'
+      - '${GITLAB_HOME}/data:/var/opt/gitlab'
+    shm_size: '256m'
+    mem_limit: '5G'
+    cpu_count: 4
