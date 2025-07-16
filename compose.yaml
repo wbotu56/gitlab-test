@@ -8,6 +8,7 @@ services:
       GITLAB_OMNIBUS_CONFIG: |
         # Add any other gitlab.rb configuration here, each on its own line
         external_url "${GITLAB_EXTERNAL_URL}"
+        letsencrypt['enable'] = false
         gitlab_rails['initial_root_password'] = "${GITLAB_ROOT_PASSWORD}"
         gitlab_rails['smtp_enable'] = true
         gitlab_rails['smtp_address'] = "${SMTP_HOST}"
@@ -23,10 +24,15 @@ services:
         gitlab_rails['gitlab_email_reply_to'] = "${SMTP_USERNAME}"
         gitlab_rails['gitlab_email_from'] = "${SMTP_USERNAME}"
         gitlab_rails['gitlab_email_display_name'] = "${SMTP_FROM_NAME}"
+        # nginx settings
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+        # Monitoring endpoints
+        gitlab_rails['monitoring_whitelist'] = ['127.0.0.0/8', '::1/128', '192.168.0.0/24', '172.16.0.0/12']
     ports:
-      - '127.0.0.1:80:80'
-      - '127.0.0.1:443:443'
-      - '127.0.0.1:2222:22'
+      - '0.0.0.0:12345:80'
+      - '127.0.0.1:10443:443'
+      - '0.0.0.0:2222:22'
     volumes:
       - '${GITLAB_HOME}/config:/etc/gitlab'
       - '${GITLAB_HOME}/logs:/var/log/gitlab'
